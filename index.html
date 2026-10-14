@@ -1,0 +1,861 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Cold Call</title>
+<meta name="description" content="Spin a question from what you just studied, think, then answer it out loud against the clock.">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,400;9..144,500;9..144,600&family=Outfit:wght@300;400;500;600&display=swap" rel="stylesheet">
+<style>
+:root{
+  --bg:#f1ece3; --bg2:#e9e2d6; --surface:#faf7f1; --surface2:#f4efe6;
+  --ink:#2a2723; --ink2:#4a453e; --muted:#857d71; --line:#e0d8ca; --line2:#d3c9b8;
+  --clay:#b2603a; --clay-soft:#ead5c7; --moss:#66724f; --moss-soft:#dfe3d2;
+  --amber:#b88a2e; --amber-soft:#efe2c3; --rust:#a4473a; --rust-soft:#efd3cd;
+  --shadow:0 1px 2px rgba(60,45,30,.06),0 8px 30px rgba(60,45,30,.07);
+  --serif:"Fraunces",Georgia,"Times New Roman",serif;
+  --sans:"Outfit",system-ui,-apple-system,"Segoe UI",sans-serif;
+  color-scheme:light;
+}
+@media (prefers-color-scheme:dark){
+  :root:not([data-theme="light"]){
+    --bg:#1b1a17; --bg2:#22201c; --surface:#262420; --surface2:#2d2a25;
+    --ink:#ece5d9; --ink2:#cfc7b9; --muted:#968e81; --line:#36322c; --line2:#454037;
+    --clay:#d27c52; --clay-soft:#43301f; --moss:#9aa784; --moss-soft:#2f3427;
+    --amber:#d4a74a; --amber-soft:#3d3220; --rust:#d36c5c; --rust-soft:#42241f;
+    --shadow:0 1px 2px rgba(0,0,0,.3),0 10px 30px rgba(0,0,0,.25);
+    color-scheme:dark;
+  }
+}
+:root[data-theme="dark"]{
+  --bg:#1b1a17; --bg2:#22201c; --surface:#262420; --surface2:#2d2a25;
+  --ink:#ece5d9; --ink2:#cfc7b9; --muted:#968e81; --line:#36322c; --line2:#454037;
+  --clay:#d27c52; --clay-soft:#43301f; --moss:#9aa784; --moss-soft:#2f3427;
+  --amber:#d4a74a; --amber-soft:#3d3220; --rust:#d36c5c; --rust-soft:#42241f;
+  --shadow:0 1px 2px rgba(0,0,0,.3),0 10px 30px rgba(0,0,0,.25);
+  color-scheme:dark;
+}
+*{box-sizing:border-box}
+[hidden]{display:none!important}
+html,body{margin:0}
+body{
+  background:var(--bg); color:var(--ink); font-family:var(--sans); font-weight:400;
+  min-height:100vh; -webkit-font-smoothing:antialiased;
+  background-image:radial-gradient(1200px 600px at 50% -10%, var(--bg2), transparent 70%);
+}
+button,select,input,textarea{font:inherit;color:inherit}
+button{cursor:pointer}
+.wrap{max-width:760px;margin:0 auto;padding:20px 16px 48px}
+
+/* header */
+header{display:flex;align-items:center;justify-content:space-between;gap:12px;margin-bottom:22px}
+.brand{display:flex;align-items:baseline;gap:10px}
+.brand h1{font-family:var(--serif);font-weight:500;font-size:26px;margin:0;letter-spacing:-.01em}
+.brand .dot{width:8px;height:8px;border-radius:50%;background:var(--clay);display:inline-block;transform:translateY(-3px)}
+.hdr-actions{display:flex;gap:8px;align-items:center}
+.icon-btn{width:38px;height:38px;border-radius:12px;border:1px solid var(--line);background:var(--surface);display:grid;place-items:center;color:var(--ink2)}
+.icon-btn:hover{border-color:var(--line2)}
+.pack-btn{display:flex;align-items:center;gap:8px;height:38px;padding:0 12px;border-radius:12px;border:1px solid var(--line);background:var(--surface);max-width:250px;color:var(--ink2);font-size:14px}
+.pack-btn span{white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+
+/* controls */
+.seg{display:flex;background:var(--surface2);border:1px solid var(--line);border-radius:14px;padding:4px;gap:4px;width:max-content;margin:0 auto}
+.seg button{border:0;background:transparent;padding:8px 16px;border-radius:10px;font-size:14px;color:var(--muted);font-weight:500}
+.seg button[aria-pressed="true"]{background:var(--surface);color:var(--ink);box-shadow:var(--shadow)}
+.mode-hint{text-align:center;color:var(--muted);font-size:13px;margin:10px 0 16px}
+.filters{display:flex;flex-wrap:wrap;gap:8px;justify-content:center;align-items:center}
+.select{appearance:none;border:1px solid var(--line);background:var(--surface);border-radius:10px;padding:7px 30px 7px 12px;font-size:13px;color:var(--ink2);
+  background-image:linear-gradient(45deg,transparent 50%,var(--muted) 50%),linear-gradient(135deg,var(--muted) 50%,transparent 50%);
+  background-position:calc(100% - 15px) 52%,calc(100% - 10px) 52%;background-size:5px 5px;background-repeat:no-repeat;max-width:200px}
+.chip{border:1px solid var(--line);background:var(--surface);border-radius:999px;padding:6px 12px;font-size:13px;color:var(--muted)}
+.chip[aria-pressed="true"]{border-color:var(--clay);color:var(--clay);background:var(--clay-soft)}
+.stats-line{text-align:center;color:var(--muted);font-size:12.5px;margin-top:12px;letter-spacing:.01em}
+.stats-line b{font-weight:500;color:var(--ink2)}
+
+/* stage */
+.stage{margin-top:22px;background:var(--surface);border:1px solid var(--line);border-radius:24px;box-shadow:var(--shadow);padding:26px 22px 22px;position:relative;overflow:hidden}
+.stage::before{content:"";position:absolute;inset:0 0 auto 0;height:3px;background:linear-gradient(90deg,transparent,var(--clay),transparent);opacity:.0;transition:opacity .4s}
+.stage.live::before{opacity:.8}
+.meta{display:flex;flex-wrap:wrap;gap:6px;justify-content:center;min-height:24px}
+.tag{font-size:11.5px;letter-spacing:.06em;text-transform:uppercase;color:var(--muted);border:1px solid var(--line);border-radius:999px;padding:3px 9px;font-weight:500}
+.tag.type{color:var(--moss);border-color:var(--moss-soft);background:var(--moss-soft)}
+.tag.stretch{color:var(--amber);border-color:var(--amber-soft);background:var(--amber-soft)}
+.dots{display:inline-flex;gap:3px;vertical-align:middle;margin-left:4px}
+.dots i{width:5px;height:5px;border-radius:50%;background:var(--line2)}
+.dots i.on{background:var(--clay)}
+.state{text-align:center;font-size:11.5px;letter-spacing:.18em;text-transform:uppercase;color:var(--clay);font-weight:600;margin:18px 0 8px}
+.question{font-family:var(--serif);font-weight:500;text-align:center;line-height:1.22;letter-spacing:-.015em;margin:0 auto;max-width:620px;min-height:3.7em;display:flex;align-items:center;justify-content:center;font-size:clamp(24px,4.6vw,34px);transition:filter .12s, opacity .12s, transform .12s}
+.question.small{font-size:clamp(20px,3.8vw,27px)}
+.question.empty{color:var(--muted);font-weight:400;font-style:italic}
+.question.blur{filter:blur(2px);opacity:.55;transform:translateY(3px)}
+.question.land{animation:land .45s cubic-bezier(.2,.9,.3,1.2)}
+@keyframes land{0%{transform:scale(.96);opacity:.4}100%{transform:scale(1);opacity:1}}
+
+.timer{display:flex;align-items:center;justify-content:center;gap:18px;margin:18px 0 4px}
+.ring{width:96px;height:96px;position:relative}
+.ring svg{transform:rotate(-90deg)}
+.ring .track{stroke:var(--line)}
+.ring .bar{stroke:var(--clay);transition:stroke-dashoffset .25s linear}
+.ring.prep .bar{stroke:var(--moss)}
+.ring.over .bar{stroke:var(--rust)}
+.ring .t{position:absolute;inset:0;display:grid;place-items:center;font-family:var(--serif);font-size:24px;font-variant-numeric:tabular-nums}
+.ring.over .t{color:var(--rust)}
+.timer .label{font-size:13px;color:var(--muted);max-width:180px;line-height:1.4}
+.rec{display:inline-flex;align-items:center;gap:6px;font-size:12px;color:var(--rust)}
+.rec::before{content:"";width:8px;height:8px;border-radius:50%;background:var(--rust);animation:pulse 1.2s infinite}
+@keyframes pulse{50%{opacity:.25}}
+
+.actions{display:flex;flex-wrap:wrap;gap:10px;justify-content:center;margin-top:20px}
+.btn{border:1px solid var(--line);background:var(--surface);border-radius:14px;padding:11px 20px;font-size:14.5px;font-weight:500;color:var(--ink2)}
+.btn:hover{border-color:var(--line2)}
+.btn.primary{background:var(--clay);border-color:var(--clay);color:#fff;box-shadow:0 6px 18px -6px var(--clay)}
+.btn.primary:hover{filter:brightness(1.05)}
+.btn:disabled{opacity:.5;cursor:default}
+.btn.ghost{background:transparent}
+.kbd{font-size:11px;color:var(--muted);text-align:center;margin-top:12px}
+.kbd kbd{font-family:var(--sans);border:1px solid var(--line);border-bottom-width:2px;border-radius:5px;padding:0 5px;font-size:10.5px}
+
+/* review */
+.review{margin-top:20px;border-top:1px dashed var(--line2);padding-top:18px}
+.review h3{font-size:12px;letter-spacing:.14em;text-transform:uppercase;color:var(--muted);margin:0 0 10px;font-weight:600}
+.points{list-style:none;padding:0;margin:0 0 14px;display:grid;gap:6px}
+.points label{display:flex;gap:10px;align-items:flex-start;padding:9px 12px;border:1px solid var(--line);border-radius:12px;font-size:14.5px;line-height:1.4;cursor:pointer;background:var(--surface2)}
+.points input{accent-color:var(--moss);margin-top:3px}
+.points label:has(input:checked){border-color:var(--moss-soft);background:var(--moss-soft)}
+.followup{font-size:14px;color:var(--ink2);background:var(--amber-soft);border-radius:12px;padding:10px 12px;margin-bottom:14px}
+.followup b{font-weight:600;color:var(--amber)}
+.speechbox{border:1px solid var(--line);border-radius:12px;padding:12px;margin-bottom:14px;font-size:13.5px;color:var(--ink2)}
+.speechbox .nums{display:flex;gap:16px;flex-wrap:wrap;margin-bottom:8px}
+.speechbox .nums div{font-size:12px;color:var(--muted)}
+.speechbox .nums b{display:block;font-family:var(--serif);font-size:20px;color:var(--ink);font-weight:500}
+.speechbox .tx{max-height:120px;overflow:auto;line-height:1.5}
+.speechbox mark{background:var(--rust-soft);color:var(--rust);border-radius:4px;padding:0 2px}
+audio{width:100%;margin-bottom:14px;height:38px}
+.grade{display:grid;grid-template-columns:repeat(3,1fr);gap:8px}
+.grade button{border:1px solid var(--line);background:var(--surface);border-radius:12px;padding:10px 6px;font-size:14px;font-weight:500}
+.grade .g-nailed:hover,.grade .g-nailed.on{border-color:var(--moss);color:var(--moss);background:var(--moss-soft)}
+.grade .g-shaky:hover,.grade .g-shaky.on{border-color:var(--amber);color:var(--amber);background:var(--amber-soft)}
+.grade .g-missed:hover,.grade .g-missed.on{border-color:var(--rust);color:var(--rust);background:var(--rust-soft)}
+.grade small{display:block;font-size:11px;color:var(--muted);font-weight:400;margin-top:2px}
+
+/* modal */
+dialog{border:1px solid var(--line);border-radius:22px;background:var(--surface);color:var(--ink);padding:0;width:min(560px,calc(100vw - 32px));max-height:min(86vh,760px);box-shadow:0 30px 80px rgba(0,0,0,.25)}
+dialog::backdrop{background:rgba(30,25,20,.35);backdrop-filter:blur(3px)}
+.m-head{display:flex;justify-content:space-between;align-items:center;padding:18px 20px 10px}
+.m-head h2{font-family:var(--serif);font-weight:500;font-size:22px;margin:0}
+.m-body{padding:6px 20px 20px;overflow:auto;max-height:calc(min(86vh,760px) - 64px)}
+.m-sec{margin-bottom:20px}
+.m-sec h4{font-size:11.5px;letter-spacing:.14em;text-transform:uppercase;color:var(--muted);margin:0 0 8px;font-weight:600}
+.packlist{display:grid;gap:8px}
+.packrow{display:flex;align-items:center;gap:10px;border:1px solid var(--line);border-radius:14px;padding:10px 12px;background:var(--surface2)}
+.packrow.on{border-color:var(--clay);background:var(--clay-soft)}
+.packrow .info{flex:1;min-width:0;cursor:pointer}
+.packrow .t{font-weight:500;font-size:14.5px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.packrow .s{font-size:12px;color:var(--muted)}
+.packrow .x{border:0;background:transparent;color:var(--muted);font-size:18px;padding:4px 6px;border-radius:8px}
+.packrow .x:hover{color:var(--rust)}
+textarea{width:100%;min-height:120px;border:1px solid var(--line);background:var(--surface2);border-radius:12px;padding:10px;font-family:ui-monospace,Menlo,Consolas,monospace;font-size:12px;resize:vertical}
+.row{display:flex;gap:8px;flex-wrap:wrap;align-items:center}
+.row input[type=text],.row input[type=url]{flex:1;min-width:180px;border:1px solid var(--line);background:var(--surface2);border-radius:10px;padding:9px 10px;font-size:13px}
+.msg{font-size:13px;margin-top:8px;min-height:18px}
+.msg.ok{color:var(--moss)} .msg.err{color:var(--rust)}
+.set{display:flex;justify-content:space-between;align-items:center;gap:12px;padding:10px 0;border-bottom:1px solid var(--line);font-size:14px}
+.set:last-child{border-bottom:0}
+.set small{display:block;color:var(--muted);font-size:12px;margin-top:2px}
+.set input[type=number]{width:76px;border:1px solid var(--line);background:var(--surface2);border-radius:10px;padding:7px 8px;text-align:right}
+.switch{appearance:none;width:40px;height:23px;border-radius:999px;background:var(--line2);position:relative;cursor:pointer;flex:none;transition:background .2s}
+.switch::after{content:"";position:absolute;top:3px;left:3px;width:17px;height:17px;border-radius:50%;background:#fff;transition:transform .2s}
+.switch:checked{background:var(--moss)}
+.switch:checked::after{transform:translateX(17px)}
+.help{font-size:13px;color:var(--ink2);line-height:1.55}
+.help ol{padding-left:18px;margin:6px 0}
+.toast{position:fixed;left:50%;bottom:22px;transform:translateX(-50%) translateY(20px);background:var(--ink);color:var(--bg);padding:10px 16px;border-radius:12px;font-size:13.5px;opacity:0;transition:.25s;pointer-events:none;z-index:50;max-width:calc(100vw - 32px)}
+.toast.show{opacity:1;transform:translateX(-50%) translateY(0)}
+footer{text-align:center;color:var(--muted);font-size:12px;margin-top:26px}
+footer a{color:inherit}
+@media (max-width:520px){
+  .brand h1{font-size:22px}
+  .pack-btn{max-width:150px}
+  .stage{padding:22px 16px 18px;border-radius:20px}
+  .ring{width:84px;height:84px}
+}
+</style>
+</head>
+<body>
+<div class="wrap">
+  <header>
+    <div class="brand"><h1>Cold Call</h1><span class="dot"></span></div>
+    <div class="hdr-actions">
+      <button class="pack-btn" id="packBtn" title="Question packs">
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M4 5a2 2 0 0 1 2-2h12v16H6a2 2 0 0 0-2 2z"/><path d="M4 21V5"/></svg>
+        <span id="packName">Packs</span>
+      </button>
+      <button class="icon-btn" id="settingsBtn" title="Settings" aria-label="Settings">
+        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.7 1.7 0 0 0 .3 1.8l.1.1a2 2 0 1 1-2.8 2.8l-.1-.1a1.7 1.7 0 0 0-1.8-.3 1.7 1.7 0 0 0-1 1.5V21a2 2 0 1 1-4 0v-.1a1.7 1.7 0 0 0-1.1-1.5 1.7 1.7 0 0 0-1.8.3l-.1.1a2 2 0 1 1-2.8-2.8l.1-.1a1.7 1.7 0 0 0 .3-1.8 1.7 1.7 0 0 0-1.5-1H3a2 2 0 1 1 0-4h.1a1.7 1.7 0 0 0 1.5-1.1 1.7 1.7 0 0 0-.3-1.8l-.1-.1a2 2 0 1 1 2.8-2.8l.1.1a1.7 1.7 0 0 0 1.8.3h0a1.7 1.7 0 0 0 1-1.5V3a2 2 0 1 1 4 0v.1a1.7 1.7 0 0 0 1 1.5 1.7 1.7 0 0 0 1.8-.3l.1-.1a2 2 0 1 1 2.8 2.8l-.1.1a1.7 1.7 0 0 0-.3 1.8v0a1.7 1.7 0 0 0 1.5 1H21a2 2 0 1 1 0 4h-.1a1.7 1.7 0 0 0-1.5 1z"/></svg>
+      </button>
+    </div>
+  </header>
+
+  <div class="seg" role="group" aria-label="Mode">
+    <button id="modeQuick" aria-pressed="true">⚡ Quick fire</button>
+    <button id="modeDeep" aria-pressed="false">🔍 Deep dive</button>
+  </div>
+  <p class="mode-hint" id="modeHint"></p>
+
+  <div class="filters">
+    <select class="select" id="topicSel" aria-label="Topic"></select>
+    <button class="chip" data-diff="0" aria-pressed="true">All levels</button>
+    <button class="chip" data-diff="1" aria-pressed="false">● Easy</button>
+    <button class="chip" data-diff="2" aria-pressed="false">●● Medium</button>
+    <button class="chip" data-diff="3" aria-pressed="false">●●● Hard</button>
+    <button class="chip" id="weakChip" aria-pressed="false" title="Show questions you missed or haven't seen more often">🎯 Weak spots</button>
+  </div>
+  <div class="stats-line" id="statsLine"></div>
+
+  <section class="stage" id="stage">
+    <div class="meta" id="meta"></div>
+    <div class="state" id="stateLbl">Ready</div>
+    <div class="question empty" id="qText">Spin to get your first question.</div>
+    <div class="timer" id="timerBox" hidden>
+      <div class="ring" id="ring">
+        <svg width="100%" height="100%" viewBox="0 0 100 100"><circle class="track" cx="50" cy="50" r="44" fill="none" stroke-width="6"/><circle class="bar" id="ringBar" cx="50" cy="50" r="44" fill="none" stroke-width="6" stroke-linecap="round" stroke-dasharray="276.46" stroke-dashoffset="0"/></svg>
+        <div class="t" id="ringT">0:00</div>
+      </div>
+      <div class="label" id="timerLbl"></div>
+    </div>
+    <div class="actions" id="actions"></div>
+    <div id="reviewBox"></div>
+  </section>
+  <p class="kbd"><kbd>Space</kbd> next step · <kbd>S</kbd> spin · <kbd>1</kbd><kbd>2</kbd><kbd>3</kbd> grade</p>
+
+  <footer>Made for practising out loud. Your progress stays in this browser.</footer>
+</div>
+
+<dialog id="packDlg">
+  <div class="m-head"><h2>Question packs</h2><button class="icon-btn" data-close aria-label="Close">✕</button></div>
+  <div class="m-body">
+    <div class="m-sec">
+      <h4>Your packs</h4>
+      <div class="packlist" id="packList"></div>
+    </div>
+    <div class="m-sec">
+      <h4>Make a new pack</h4>
+      <div class="help">
+        <ol>
+          <li>Study a chapter, video or chat as usual.</li>
+          <li>In that chat, paste the generator prompt <button class="btn ghost" id="copyPrompt" style="padding:4px 10px;font-size:12.5px">Copy prompt</button></li>
+          <li>Paste the JSON it gives you below, or import the file.</li>
+        </ol>
+      </div>
+    </div>
+    <div class="m-sec">
+      <h4>Import</h4>
+      <textarea id="importTxt" placeholder='Paste pack JSON here: { "schema": "coldcall/v1", ... }'></textarea>
+      <div class="row" style="margin-top:8px">
+        <button class="btn primary" id="importBtn">Add pack</button>
+        <label class="btn" style="display:inline-block">Choose file<input type="file" id="importFile" accept=".json,application/json" multiple hidden></label>
+      </div>
+      <div class="row" style="margin-top:8px">
+        <input type="url" id="importUrl" placeholder="…or a link to a raw .json file">
+        <button class="btn" id="importUrlBtn">Load</button>
+      </div>
+      <div class="msg" id="importMsg"></div>
+    </div>
+  </div>
+</dialog>
+
+<dialog id="setDlg">
+  <div class="m-head"><h2>Settings</h2><button class="icon-btn" data-close aria-label="Close">✕</button></div>
+  <div class="m-body">
+    <div class="m-sec">
+      <h4>Quick fire</h4>
+      <div class="set"><div>Thinking time<small>Seconds before you must start talking</small></div><input type="number" min="0" max="120" id="sQThink"></div>
+      <div class="set"><div>Speaking time<small>Seconds</small></div><input type="number" min="15" max="600" id="sQSpeak"></div>
+    </div>
+    <div class="m-sec">
+      <h4>Deep dive</h4>
+      <div class="set"><div>Research time<small>Minutes to look things up and plan</small></div><input type="number" min="1" max="60" id="sDResearch"></div>
+      <div class="set"><div>Speaking time<small>Seconds</small></div><input type="number" min="30" max="900" id="sDSpeak"></div>
+    </div>
+    <div class="m-sec">
+      <h4>Practice tools</h4>
+      <div class="set"><div>Record my answer<small>Play it back afterwards. Nothing is saved or uploaded.</small></div><input type="checkbox" class="switch" id="sRecord"></div>
+      <div class="set"><div>Live transcript &amp; filler counter<small id="sTxNote">Counts "um", "uh", "like"… and words per minute. Chrome/Edge only; speech is processed by the browser's speech service.</small></div><input type="checkbox" class="switch" id="sTranscript"></div>
+      <div class="set"><div>Transcript accent</div>
+        <select class="select" id="sLang"><option value="en-IN">English (India)</option><option value="en-GB">English (UK)</option><option value="en-US">English (US)</option><option value="de-DE">Deutsch</option></select></div>
+      <div class="set"><div>Sounds</div><input type="checkbox" class="switch" id="sSound"></div>
+      <div class="set"><div>Auto-start speaking when thinking time ends<small>Quick fire only</small></div><input type="checkbox" class="switch" id="sAuto"></div>
+    </div>
+    <div class="m-sec">
+      <h4>Progress</h4>
+      <div class="row"><button class="btn" id="resetPack">Reset progress for this pack</button></div>
+    </div>
+  </div>
+</dialog>
+
+<div class="toast" id="toast"></div>
+
+<script id="sample-pack" type="application/json">{"schema": "coldcall/v1", "id": "sample-sql-basics", "title": "SQL Basics — Sample Pack", "source": {"type": "book", "name": "Data Analysis for Beginners: SQL (sample)", "part": "Chapter 1"}, "created": "2026-10-14", "questions": [{"id": "sql1-01", "type": "concept", "difficulty": 1, "topic": "Foundations", "mode": "quick", "q": "What is a relational database, and why do analysts care about it?", "points": ["Data stored in tables of rows and columns", "Tables linked by keys", "Lets you combine and query data consistently"], "followup": "How is a table different from an Excel sheet?"}, {"id": "sql1-02", "type": "compare", "difficulty": 1, "topic": "Keys", "mode": "quick", "q": "Primary key vs foreign key — explain the difference with one real example.", "points": ["Primary key uniquely identifies a row", "Foreign key points to a primary key in another table", "Example: orders.customer_id → customers.id"], "followup": "What happens if a foreign key points to a row that doesn't exist?"}, {"id": "sql1-03", "type": "concept", "difficulty": 1, "topic": "SELECT", "mode": "quick", "q": "Walk me through what SELECT, FROM and WHERE each do in a query.", "points": ["FROM picks the table", "WHERE filters rows", "SELECT picks the columns to return"], "followup": "In what order does the database actually run them?"}, {"id": "sql1-04", "type": "trick", "difficulty": 2, "topic": "SELECT", "mode": "quick", "q": "Why can't you use a column alias from SELECT inside the WHERE clause?", "points": ["WHERE runs before SELECT", "The alias doesn't exist yet at that point", "Repeat the expression or use a subquery/CTE"], "followup": "Can you use the alias in ORDER BY? Why?"}, {"id": "sql1-05", "type": "trick", "difficulty": 2, "topic": "NULL", "mode": "quick", "q": "Why does WHERE column = NULL return nothing?", "points": ["NULL means unknown, not a value", "Any comparison with NULL is unknown, not true", "Use IS NULL / IS NOT NULL"], "followup": "What does COUNT(column) do with NULLs vs COUNT(*)?"}, {"id": "sql1-06", "type": "compare", "difficulty": 2, "topic": "Aggregation", "mode": "quick", "q": "WHERE vs HAVING — when do you use each?", "points": ["WHERE filters rows before grouping", "HAVING filters groups after aggregation", "HAVING can use aggregates like SUM()"], "followup": "Give a query that needs both."}, {"id": "sql1-07", "type": "eli5", "difficulty": 1, "topic": "Aggregation", "mode": "quick", "q": "Explain GROUP BY to someone who has never written SQL.", "points": ["Puts rows into buckets with the same value", "Then calculates one result per bucket", "Like a pivot table summary"], "followup": "What error do you get if you select a column that isn't grouped?"}, {"id": "sql1-08", "type": "compare", "difficulty": 2, "topic": "Joins", "mode": "deep", "q": "INNER JOIN vs LEFT JOIN — explain with customers and orders, and say when the result row counts differ.", "points": ["INNER keeps only matches", "LEFT keeps all left rows, NULLs where no match", "Counts differ when some customers have no orders", "Duplicates appear when one customer has many orders"], "followup": "How would you find customers with no orders?"}, {"id": "sql1-09", "type": "debug", "difficulty": 3, "topic": "Joins", "mode": "deep", "q": "After a join, your total revenue is suddenly three times too high. What probably happened, and how do you check?", "points": ["Join fanned out: one-to-many duplicated rows", "Check row counts before and after the join", "Check key uniqueness with GROUP BY key HAVING COUNT(*) > 1", "Aggregate first, then join"], "followup": "How would you prevent this in a report?"}, {"id": "sql1-10", "type": "scenario", "difficulty": 2, "topic": "Data quality", "mode": "deep", "q": "You load data from a source system into a target table. How do you prove nothing was lost or changed?", "points": ["Compare row counts", "Compare sums / checksums of key columns", "Use MINUS / EXCEPT both ways to find differences", "Check NULLs, data types and duplicates"], "followup": "Which check would you automate first, and why?"}, {"id": "sql1-11", "type": "interview", "difficulty": 2, "topic": "Foundations", "mode": "quick", "q": "Tell me about a time SQL helped you find a problem in data.", "points": ["Situation and what data was involved", "The query or check you used", "What you found", "Result and what changed"], "followup": "What would you do differently now?"}, {"id": "sql1-12", "type": "why", "difficulty": 2, "topic": "Aggregation", "mode": "quick", "q": "Why might COUNT(*) and COUNT(DISTINCT customer_id) give very different numbers?", "points": ["COUNT(*) counts rows", "DISTINCT counts unique customers", "Big gap means repeat orders or duplicates"], "followup": "Which one answers 'how many customers bought something'?"}, {"id": "sql1-13", "type": "concept", "difficulty": 2, "topic": "Window functions", "mode": "deep", "q": "What is a window function, and how is it different from GROUP BY?", "points": ["Calculates across related rows without collapsing them", "GROUP BY returns one row per group", "Examples: ROW_NUMBER, RANK, running totals with SUM() OVER"], "followup": "How would you get each customer's latest order?"}, {"id": "sql1-14", "type": "trick", "difficulty": 3, "topic": "NULL", "mode": "quick", "q": "A NOT IN subquery suddenly returns zero rows. What's the likely cause?", "points": ["The subquery returned a NULL", "x NOT IN (..., NULL) is never true", "Use NOT EXISTS or filter NULLs out"], "followup": "Does IN have the same problem?"}, {"id": "sql1-15", "type": "scenario", "difficulty": 3, "topic": "Reporting", "mode": "deep", "q": "Your manager says this month's report number looks wrong. Talk through how you investigate.", "points": ["Clarify what 'wrong' means and the expected number", "Check filters, date ranges and time zones", "Compare with last month and the source", "Look for duplicates, NULLs and late-arriving data", "Explain the cause and the fix clearly"], "followup": "How do you communicate it if it was your mistake?"}, {"id": "sql1-16", "type": "eli5", "difficulty": 1, "topic": "Foundations", "mode": "quick", "q": "Explain what an index is using a book as the example.", "points": ["Like the index at the back of a book", "Lets the database find rows without reading everything", "Speeds up reads, slightly slows writes"], "followup": "When would an index not help?"}]}</script>
+<script id="prompt-template" type="text/plain">You are creating a **question pack** for my speaking-practice app, Cold Call.
+I study a topic, then answer random questions **out loud, against a timer**, to revise and to get better at
+explaining things clearly in interviews.
+
+**Material:** use [the chapter / PDF / video transcript / our conversation above — say which].
+**My goal:** [e.g. "interview for a Reporting Analyst role; I use Oracle SQL daily as a data tester"].
+
+## What to generate
+
+- **15–25 questions** based on the material. Mostly things the material actually covers.
+  You may add up to 4 "stretch" questions that go one step beyond it (common interview follow-ups) —
+  put `"stretch": true` on those.
+- Every question must be answerable **by speaking for 1–3 minutes**. No "write a query" tasks, no
+  multiple choice. Ask for explanations, reasons, comparisons and stories.
+- Use a **mix of types** (at least 5 different ones):
+  - `concept` — explain what something is
+  - `why` — why it works / why it matters
+  - `compare` — X vs Y, when to use which
+  - `scenario` — "you're at work and this happens, what do you do?"
+  - `debug` — "this result looks wrong, what happened?"
+  - `trick` — a common misconception or gotcha
+  - `eli5` — explain it to a non-technical person
+  - `interview` — behavioural or "tell me about a time…" linked to the topic
+- `difficulty`: 1 = definition, 2 = understanding, 3 = applying under pressure. Aim for roughly 30 / 45 / 25 %.
+- `mode`: `"quick"` if I can answer with no preparation in about a minute, `"deep"` if it deserves a few
+  minutes of research or thinking first.
+- `points`: 3–5 **short** key points a strong answer covers (under 12 words each). I use them to grade myself
+  after speaking, so make them checkable.
+- `followup`: one sharper follow-up question an interviewer might ask next.
+- `topic`: the section or sub-topic, so I can filter (keep to 3–8 distinct topics per pack).
+- Write questions in plain, natural English, the way an interviewer would actually say them.
+
+## Output format
+
+Return **only** one JSON code block, valid JSON, no comments, exactly this shape:
+
+```json
+{
+  "schema": "coldcall/v1",
+  "id": "short-kebab-id-for-this-pack",
+  "title": "Readable pack title",
+  "source": { "type": "book | pdf | video | chat | article | notes", "name": "Name of the source", "part": "Chapter 1" },
+  "created": "YYYY-MM-DD",
+  "questions": [
+    {
+      "id": "c1-01",
+      "q": "The question text?",
+      "type": "concept",
+      "difficulty": 1,
+      "topic": "Sub-topic",
+      "mode": "quick",
+      "points": ["Key point one", "Key point two", "Key point three"],
+      "followup": "A sharper follow-up?"
+    }
+  ]
+}
+```
+
+If you can create files, also save it as `<id>.json` so I can download it.
+Then, in one or two lines after the JSON, tell me which question you think I'll find hardest and why.</script>
+
+<script>
+(() => {
+"use strict";
+const $ = s => document.querySelector(s);
+const $$ = s => [...document.querySelectorAll(s)];
+
+/* ---------- storage (safe) ---------- */
+const store = {
+  get(k, d){ try{ const v = localStorage.getItem("coldcall:"+k); return v==null ? d : JSON.parse(v); }catch{ return d; } },
+  set(k, v){ try{ localStorage.setItem("coldcall:"+k, JSON.stringify(v)); }catch{} }
+};
+
+const DEFAULTS = { qThink:15, qSpeak:60, dResearch:5, dSpeak:120, record:false, transcript:false, lang:"en-IN", sound:true, auto:true };
+let settings = Object.assign({}, DEFAULTS, store.get("settings", {}));
+let library = store.get("library", []);          // imported packs
+let progress = store.get("progress", {});        // key -> {seen, grade, ts, hits}
+let ui = Object.assign({ mode:"quick", pack:"__all__", topic:"", diff:0, weak:false }, store.get("ui", {}));
+
+let repoPacks = [];   // loaded from packs/ folder when hosted
+let builtin = [];
+try{ const s = JSON.parse($("#sample-pack").textContent); if(s) builtin = [normalize(s, "builtin")]; }catch{}
+
+/* ---------- pack handling ---------- */
+function normalize(p, origin){
+  if(!p || typeof p !== "object") throw new Error("Not a JSON object.");
+  if(!Array.isArray(p.questions) || !p.questions.length) throw new Error('No "questions" array found.');
+  const id = String(p.id || (p.title||"pack").toLowerCase().replace(/[^a-z0-9]+/g,"-").replace(/^-|-$/g,"") || ("pack-"+Date.now()));
+  const qs = p.questions.filter(q => q && typeof q.q === "string" && q.q.trim()).map((q,i) => ({
+    id: String(q.id || ("q"+(i+1))),
+    q: q.q.trim(),
+    type: String(q.type || "concept").toLowerCase(),
+    difficulty: Math.min(3, Math.max(1, parseInt(q.difficulty,10) || 2)),
+    topic: q.topic ? String(q.topic) : "General",
+    mode: ["quick","deep","both"].includes(q.mode) ? q.mode : "both",
+    points: Array.isArray(q.points) ? q.points.map(String) : [],
+    followup: q.followup ? String(q.followup) : "",
+    stretch: !!q.stretch
+  }));
+  if(!qs.length) throw new Error('Questions need a "q" field with text.');
+  return { id, title: String(p.title || id), source: p.source || {}, created: p.created || "", questions: qs, origin };
+}
+function allPacks(){
+  const map = new Map();
+  [...builtin, ...repoPacks, ...library].forEach(p => map.set(p.id, p)); // later wins
+  return [...map.values()];
+}
+function activePacks(){
+  const packs = allPacks();
+  if(ui.pack === "__all__") return packs;
+  const p = packs.find(x => x.id === ui.pack);
+  return p ? [p] : packs;
+}
+function pool(ignoreFilters){
+  let qs = [];
+  activePacks().forEach(p => p.questions.forEach(q => qs.push(Object.assign({ pack:p.id, packTitle:p.title, key:p.id+"::"+q.id }, q))));
+  if(ignoreFilters) return qs;
+  if(ui.topic) qs = qs.filter(q => q.topic === ui.topic);
+  if(ui.diff) qs = qs.filter(q => q.difficulty === ui.diff);
+  const want = ui.mode === "quick" ? ["quick","both"] : ["deep","both"];
+  const byMode = qs.filter(q => want.includes(q.mode));
+  return byMode.length ? byMode : qs;
+}
+
+/* ---------- picking ---------- */
+let recent = [];
+function weight(q){
+  const pr = progress[q.key];
+  if(!ui.weak) return 1;
+  if(!pr) return 3;
+  const days = (Date.now() - (pr.ts||0)) / 864e5;
+  if(pr.grade === "missed") return 5;
+  if(pr.grade === "shaky") return 2.5 + Math.min(days, 3) * .3;
+  return Math.min(0.4 + days * .15, 2);  // nailed: comes back slowly
+}
+function pick(){
+  const qs = pool();
+  if(!qs.length) return null;
+  let cand = qs.filter(q => !recent.includes(q.key));
+  if(!cand.length) cand = qs;
+  const ws = cand.map(weight), total = ws.reduce((a,b)=>a+b,0);
+  let r = Math.random() * total;
+  for(let i=0;i<cand.length;i++){ r -= ws[i]; if(r <= 0) return cand[i]; }
+  return cand[cand.length-1];
+}
+
+/* ---------- sound ---------- */
+let actx;
+function tone(freq, dur=.08, type="sine", vol=.06, when=0){
+  if(!settings.sound) return;
+  try{
+    actx = actx || new (window.AudioContext || window.webkitAudioContext)();
+    const t = actx.currentTime + when, o = actx.createOscillator(), g = actx.createGain();
+    o.type = type; o.frequency.value = freq;
+    g.gain.setValueAtTime(0, t); g.gain.linearRampToValueAtTime(vol, t+.01); g.gain.exponentialRampToValueAtTime(.0001, t+dur);
+    o.connect(g).connect(actx.destination); o.start(t); o.stop(t+dur+.02);
+  }catch{}
+}
+const sfx = {
+  tick(){ tone(880 + Math.random()*120, .04, "triangle", .035); },
+  land(){ tone(523, .18, "sine", .07); tone(784, .3, "sine", .06, .09); },
+  start(){ tone(660, .12, "sine", .07); tone(990, .22, "sine", .06, .12); },
+  end(){ tone(392, .6, "sine", .08); tone(294, .9, "sine", .06, .18); },
+  warn(){ tone(740, .07, "square", .025); }
+};
+
+/* ---------- state ---------- */
+let state = "idle", cur = null, timer = null, overtime = false, tStart = 0;
+let media = { rec:null, chunks:[], url:"", stream:null };
+let speech = { rec:null, finalTx:"", interim:"", active:false, start:0, end:0 };
+
+function setState(s){ state = s; render(); }
+
+/* ---------- render ---------- */
+function render(){
+  // mode
+  $("#modeQuick").setAttribute("aria-pressed", ui.mode==="quick");
+  $("#modeDeep").setAttribute("aria-pressed", ui.mode==="deep");
+  $("#modeHint").textContent = ui.mode === "quick"
+    ? `${settings.qThink}s to think, ${fmt(settings.qSpeak)} to talk. Train your quick thinking.`
+    : `${settings.dResearch} min to research and plan, then ${fmt(settings.dSpeak)} to explain it properly.`;
+  // pack button
+  const packs = allPacks();
+  const ap = ui.pack === "__all__" ? null : packs.find(p=>p.id===ui.pack);
+  $("#packName").textContent = ap ? ap.title : `All packs (${packs.length})`;
+  // topics
+  const topics = [...new Set(pool(true).map(q=>q.topic))].sort();
+  if(ui.topic && !topics.includes(ui.topic)) ui.topic = "";
+  $("#topicSel").innerHTML = `<option value="">All topics</option>` + topics.map(t=>`<option ${t===ui.topic?"selected":""}>${esc(t)}</option>`).join("");
+  $$(".chip[data-diff]").forEach(c => c.setAttribute("aria-pressed", +c.dataset.diff === ui.diff));
+  $("#weakChip").setAttribute("aria-pressed", ui.weak);
+  renderStats();
+
+  // stage
+  const locked = ["spinning","prep","speak"].includes(state);
+  $$(".seg button, .chip, #topicSel, #packBtn").forEach(el => el.disabled = locked);
+  $("#stage").classList.toggle("live", state==="speak");
+  const q = $("#qText");
+  if(state !== "spinning"){
+    if(cur){ q.textContent = cur.q; q.classList.remove("empty"); q.classList.toggle("small", cur.q.length > 95); }
+    else { q.textContent = pool().length ? "Spin to get your first question." : "No questions match. Change the filters or add a pack."; q.classList.add("empty"); q.classList.remove("small"); }
+  }
+  $("#meta").innerHTML = cur && state !== "spinning" ? metaHtml(cur) : "";
+  $("#stateLbl").textContent = ({ idle:"Ready", spinning:"Drawing…", ready:"Your question", prep: ui.mode==="quick" ? "Think" : "Research", prepdone:"Time to talk", speak: overtime ? "Wrap it up" : "Speak", review:"How did it go?" })[state];
+
+  // actions
+  const A = $("#actions"); A.innerHTML = "";
+  const add = (label, fn, cls="btn") => { const b = document.createElement("button"); b.className = cls; b.innerHTML = label; b.onclick = fn; A.appendChild(b); return b; };
+  if(state === "idle" || state === "ready"){
+    add("Spin", spin, "btn primary").disabled = !pool().length;
+    if(state === "ready"){
+      if(ui.mode === "quick"){
+        if(settings.qThink > 0) add(`Start ${settings.qThink}s to think`, startPrep);
+        add("Speak now", startSpeak, settings.qThink > 0 ? "btn ghost" : "btn");
+      } else {
+        add(`Start ${settings.dResearch} min research`, startPrep);
+        add("Skip to speaking", startSpeak, "btn ghost");
+      }
+    }
+  } else if(state === "spinning"){
+    add("Spinning…", ()=>{}, "btn primary").disabled = true;
+  } else if(state === "prep"){
+    add("I'm ready, start talking", startSpeak, "btn primary");
+    add("Re-spin", () => { stopTimer(); spin(); }, "btn ghost");
+  } else if(state === "prepdone"){
+    add("Start speaking", startSpeak, "btn primary");
+  } else if(state === "speak"){
+    add("Done", finishSpeak, "btn primary");
+  } else if(state === "review"){
+    add("Next question", spin, "btn primary");
+    add("Try this one again", () => { cleanupMedia(); setState("ready"); }, "btn ghost");
+  }
+
+  // review
+  $("#reviewBox").innerHTML = state === "review" ? reviewHtml() : "";
+  if(state === "review") wireReview();
+  $("#timerBox").hidden = !["prep","prepdone","speak"].includes(state);
+}
+function metaHtml(c){
+  const dots = `<span class="dots">${[1,2,3].map(i=>`<i class="${i<=c.difficulty?"on":""}"></i>`).join("")}</span>`;
+  const pr = progress[c.key];
+  return `<span class="tag type">${esc(label(c.type))}</span><span class="tag">${esc(c.topic)}</span><span class="tag">Level ${dots}</span>`
+    + (c.stretch ? `<span class="tag stretch">Stretch</span>` : "")
+    + (pr ? `<span class="tag">Last: ${esc(pr.grade)}</span>` : "")
+    + (ui.pack === "__all__" && allPacks().length > 1 ? `<span class="tag">${esc(c.packTitle)}</span>` : "");
+}
+function label(t){ return ({ concept:"Explain", why:"Why", compare:"Compare", scenario:"Scenario", debug:"Debug", trick:"Gotcha", eli5:"Explain simply", interview:"Interview" })[t] || t; }
+function renderStats(){
+  const qs = pool(true);
+  let seen=0,n=0,s=0,m=0;
+  qs.forEach(q => { const p = progress[q.key]; if(p){ seen++; if(p.grade==="nailed")n++; else if(p.grade==="shaky")s++; else if(p.grade==="missed")m++; } });
+  $("#statsLine").innerHTML = qs.length
+    ? `<b>${seen}</b>/${qs.length} practised · <b>${n}</b> nailed · <b>${s}</b> shaky · <b>${m}</b> missed`
+    : `No questions yet. Add a pack to start.`;
+}
+function reviewHtml(){
+  const c = cur; let h = `<div class="review">`;
+  if(c.points.length){
+    h += `<h3>Did you cover these?</h3><ul class="points">` + c.points.map((p,i)=>`<li><label><input type="checkbox" data-pt="${i}"> <span>${esc(p)}</span></label></li>`).join("") + `</ul>`;
+  }
+  if(c.followup) h += `<div class="followup"><b>Follow-up:</b> ${esc(c.followup)}</div>`;
+  if(speech.finalTx || speech.interim || speech.used){
+    const tx = (speech.finalTx + " " + speech.interim).trim();
+    const words = tx ? tx.split(/\s+/).length : 0;
+    const mins = Math.max((speech.end - speech.start)/60000, 1/60);
+    const { count, html } = fillers(tx);
+    h += `<div class="speechbox"><div class="nums"><div><b>${Math.round(words/mins)}</b>words / min</div><div><b>${count}</b>filler words</div><div><b>${words}</b>words</div></div>`
+      + `<div class="tx">${html || "<i>Nothing was picked up. Check microphone permission.</i>"}</div></div>`;
+  }
+  if(media.url) h += `<audio controls src="${media.url}"></audio>`;
+  h += `<h3>Grade yourself</h3><div class="grade">
+    <button class="g-nailed" data-g="nailed">Nailed it<small>clear &amp; complete</small></button>
+    <button class="g-shaky" data-g="shaky">Shaky<small>got there, messy</small></button>
+    <button class="g-missed" data-g="missed">Missed<small>review this</small></button></div></div>`;
+  return h;
+}
+function wireReview(){
+  const pts = $$("[data-pt]");
+  $$(".grade button").forEach(b => b.onclick = () => grade(b.dataset.g));
+  pts.forEach(p => p.onchange = () => {
+    const done = pts.filter(x=>x.checked).length, r = done/pts.length;
+    $$(".grade button").forEach(b=>b.classList.remove("on"));
+    const g = r >= .8 ? "nailed" : r >= .4 ? "shaky" : "missed";
+    $(`.grade [data-g="${g}"]`).classList.add("on");
+  });
+}
+function grade(g){
+  if(!cur || state !== "review") return;
+  const p = progress[cur.key] || { hits:0 };
+  progress[cur.key] = { seen:true, grade:g, ts:Date.now(), hits:(p.hits||0)+1 };
+  store.set("progress", progress);
+  toast(g === "nailed" ? "Nice. It will come back less often." : g === "shaky" ? "Saved. It will come back soon." : "Saved. Turn on Weak spots to see it more.");
+  spin();
+}
+const FILLERS = ["um","umm","uh","uhh","er","erm","ah","hmm","like","you know","basically","actually","i mean","kind of","sort of"];
+function fillers(tx){
+  if(!tx) return { count:0, html:"" };
+  let count = 0;
+  const re = new RegExp("\\b(" + FILLERS.map(f=>f.replace(/ /g,"\\s+")).join("|") + ")\\b", "gi");
+  const html = esc(tx).replace(re, m => { count++; return `<mark>${m}</mark>`; });
+  return { count, html };
+}
+
+/* ---------- flow ---------- */
+function spin(){
+  stopTimer(); cleanupMedia();
+  const qs = pool();
+  if(!qs.length){ cur = null; setState("idle"); return; }
+  const final = pick();
+  state = "spinning"; cur = null; render();
+  const q = $("#qText"); q.classList.remove("empty","land");
+  let delay = 45, elapsed = 0;
+  const step = () => {
+    const r = qs[Math.floor(Math.random()*qs.length)];
+    q.textContent = r.q; q.classList.toggle("small", r.q.length > 95);
+    q.classList.add("blur"); sfx.tick();
+    elapsed += delay; delay *= 1.13;
+    if(elapsed < 1500) setTimeout(step, delay);
+    else setTimeout(() => {
+      cur = final; recent = [final.key, ...recent].slice(0, Math.min(4, Math.floor(qs.length/2)));
+      q.classList.remove("blur"); void q.offsetWidth; q.classList.add("land"); sfx.land();
+      setState("ready");
+    }, delay);
+  };
+  step();
+}
+function startPrep(){
+  const secs = ui.mode === "quick" ? settings.qThink : settings.dResearch*60;
+  setState("prep");
+  runTimer(secs, "prep", ui.mode === "quick" ? "Plan: point → example → why it matters." : "Look it up, note 3 points, plan your opening line.", () => {
+    sfx.end();
+    if(ui.mode === "quick" && settings.auto) startSpeak();
+    else { setState("prepdone"); $("#ringT").textContent = "0:00"; $("#timerLbl").textContent = "Time's up. Start when you're ready."; }
+  });
+  sfx.start();
+}
+async function startSpeak(){
+  stopTimer(); cleanupMedia();
+  overtime = false;
+  const secs = ui.mode === "quick" ? settings.qSpeak : settings.dSpeak;
+  setState("speak"); sfx.start();
+  runTimer(secs, "speak", "Talk until the ring closes.", () => {
+    overtime = true; sfx.end(); render();
+    $("#timerLbl").textContent = "Time! Finish your sentence.";
+  }, true);
+  if(settings.record) startRecording();
+  if(settings.transcript) startTranscript();
+}
+function finishSpeak(){
+  stopTimer();
+  speech.end = Date.now();
+  stopRecording(); stopTranscript();
+  setState("review");
+  setTimeout(() => { if(state === "review") render(); }, 700); // let recorder/transcript flush
+}
+function runTimer(total, kind, lbl, onEnd, allowOver){
+  const ring = $("#ring"), bar = $("#ringBar"), C = 276.46;
+  ring.className = "ring " + kind; $("#timerLbl").textContent = lbl;
+  tStart = Date.now(); let ended = false;
+  const tick = () => {
+    const el = (Date.now() - tStart)/1000, left = total - el;
+    if(left > 0){
+      $("#ringT").textContent = fmt(Math.ceil(left));
+      bar.style.strokeDashoffset = C * (el/total);
+      if(left <= 5.05 && left > 4.8 && kind==="speak") sfx.warn();
+    } else {
+      if(!ended){ ended = true; bar.style.strokeDashoffset = C; onEnd(); if(!allowOver){ stopTimer(); return; } ring.classList.add("over"); }
+      $("#ringT").textContent = "+" + fmt(Math.floor(-left));
+    }
+  };
+  tick(); timer = setInterval(tick, 250);
+}
+function stopTimer(){ if(timer){ clearInterval(timer); timer = null; } }
+
+/* ---------- recording ---------- */
+async function startRecording(){
+  try{
+    media.stream = await navigator.mediaDevices.getUserMedia({ audio:true });
+    media.chunks = [];
+    media.rec = new MediaRecorder(media.stream);
+    media.rec.ondataavailable = e => e.data.size && media.chunks.push(e.data);
+    media.rec.onstop = () => {
+      const blob = new Blob(media.chunks, { type: media.rec.mimeType || "audio/webm" });
+      media.url = URL.createObjectURL(blob);
+      media.stream && media.stream.getTracks().forEach(t=>t.stop());
+      if(state === "review") render();
+    };
+    media.rec.start();
+    const tl = $("#timerLbl"); if(tl && !tl.querySelector(".rec")) tl.insertAdjacentHTML("beforeend", `<br><span class="rec">Recording</span>`);
+  }catch(e){ toast("Microphone not available, so no recording this time."); }
+}
+function stopRecording(){ try{ if(media.rec && media.rec.state !== "inactive") media.rec.stop(); }catch{} }
+function cleanupMedia(){
+  stopRecording(); stopTranscript();
+  if(media.url){ URL.revokeObjectURL(media.url); media.url = ""; }
+  speech = { rec:null, finalTx:"", interim:"", active:false, start:0, end:0, used:false };
+}
+
+/* ---------- transcript ---------- */
+const SR = window.SpeechRecognition || window.webkitSpeechRecognition;
+function startTranscript(){
+  if(!SR){ toast("Live transcript needs Chrome or Edge."); return; }
+  speech = { rec:new SR(), finalTx:"", interim:"", active:true, start:Date.now(), end:0, used:true };
+  const r = speech.rec; r.lang = settings.lang; r.continuous = true; r.interimResults = true;
+  r.onresult = e => {
+    let interim = "";
+    for(let i=e.resultIndex;i<e.results.length;i++){
+      const t = e.results[i][0].transcript;
+      if(e.results[i].isFinal) speech.finalTx += " " + t; else interim += t;
+    }
+    speech.interim = interim;
+  };
+  r.onerror = e => { if(e.error === "not-allowed") toast("Microphone permission was blocked."); };
+  r.onend = () => { if(speech.active){ try{ r.start(); }catch{} } };
+  try{ r.start(); }catch{}
+}
+function stopTranscript(){ if(speech.rec){ speech.active = false; try{ speech.rec.stop(); }catch{} } }
+
+/* ---------- packs dialog ---------- */
+function renderPackList(){
+  const packs = allPacks(), total = packs.reduce((a,p)=>a+p.questions.length,0);
+  const row = (id, title, sub, removable) => `<div class="packrow ${ui.pack===id?"on":""}">
+    <div class="info" data-pick="${esc(id)}"><div class="t">${esc(title)}</div><div class="s">${esc(sub)}</div></div>
+    ${removable ? `<button class="x" data-del="${esc(id)}" title="Remove pack" aria-label="Remove pack">✕</button>` : ""}</div>`;
+  let h = row("__all__", "All packs mixed", `${packs.length} packs · ${total} questions`, false);
+  packs.forEach(p => {
+    const src = [p.source && p.source.name, p.source && p.source.part].filter(Boolean).join(" · ");
+    const where = p.origin === "repo" ? "from repo" : p.origin === "builtin" ? "built-in sample" : "imported";
+    h += row(p.id, p.title, `${p.questions.length} questions · ${src ? src + " · " : ""}${where}`, p.origin === "import");
+  });
+  $("#packList").innerHTML = h;
+  $$("[data-pick]").forEach(el => el.onclick = () => { ui.pack = el.dataset.pick; ui.topic = ""; saveUi(); cur = null; state = "idle"; renderPackList(); render(); });
+  $$("[data-del]").forEach(el => el.onclick = () => {
+    const id = el.dataset.del;
+    if(!confirm("Remove this pack? Your progress for it stays saved.")) return;
+    library = library.filter(p => p.id !== id); store.set("library", library);
+    if(ui.pack === id) ui.pack = "__all__";
+    saveUi(); renderPackList(); render();
+  });
+}
+function addPack(raw, viaUrl){
+  const msg = $("#importMsg");
+  try{
+    let txt = typeof raw === "string" ? raw.trim() : raw;
+    if(typeof txt === "string"){
+      const fence = txt.match(/```(?:json)?\s*([\s\S]*?)```/i); if(fence) txt = fence[1];
+      const a = txt.indexOf("{"), b = txt.lastIndexOf("}");
+      if(a < 0 || b < 0) throw new Error("Couldn't find JSON in that text.");
+      txt = JSON.parse(txt.slice(a, b+1));
+    }
+    const p = normalize(txt, "import");
+    const existed = library.some(x => x.id === p.id);
+    library = library.filter(x => x.id !== p.id).concat(p);
+    store.set("library", library);
+    ui.pack = p.id; ui.topic = ""; saveUi(); cur = null; state = "idle";
+    msg.className = "msg ok"; msg.textContent = `${existed ? "Updated" : "Added"} "${p.title}" with ${p.questions.length} question${p.questions.length===1?"":"s"}.`;
+    $("#importTxt").value = "";
+    renderPackList(); render();
+    return true;
+  }catch(e){
+    msg.className = "msg err"; msg.textContent = (viaUrl ? "Couldn't load that link. " : "") + e.message;
+    return false;
+  }
+}
+async function loadUrl(url){
+  const r = await fetch(url, { cache:"no-cache" });
+  if(!r.ok) throw new Error("HTTP " + r.status);
+  return r.text();
+}
+async function loadRepoPacks(){
+  try{
+    const r = await fetch("packs/index.json", { cache:"no-cache" });
+    if(!r.ok) return;
+    const idx = await r.json();
+    const files = Array.isArray(idx) ? idx : (idx.packs || []);
+    const got = await Promise.all(files.map(f => fetch("packs/" + f, { cache:"no-cache" }).then(x => x.ok ? x.json() : null).catch(()=>null)));
+    repoPacks = got.filter(Boolean).map(p => { try{ return normalize(p, "repo"); }catch{ return null; } }).filter(Boolean);
+    if(repoPacks.length) builtin = builtin.filter(b => !repoPacks.some(r => r.id === b.id));
+    render();
+  }catch{}
+}
+
+/* ---------- settings dialog ---------- */
+function openSettings(){
+  $("#sQThink").value = settings.qThink; $("#sQSpeak").value = settings.qSpeak;
+  $("#sDResearch").value = settings.dResearch; $("#sDSpeak").value = settings.dSpeak;
+  $("#sRecord").checked = settings.record; $("#sTranscript").checked = settings.transcript;
+  $("#sLang").value = settings.lang; $("#sSound").checked = settings.sound; $("#sAuto").checked = settings.auto;
+  if(!SR){ $("#sTranscript").disabled = true; $("#sTxNote").textContent = "Not supported in this browser. Use Chrome or Edge."; }
+  $("#setDlg").showModal();
+}
+function readSettings(){
+  const n = (id, min, max, d) => { const v = parseInt($(id).value, 10); return isNaN(v) ? d : Math.min(max, Math.max(min, v)); };
+  settings.qThink = n("#sQThink", 0, 120, DEFAULTS.qThink);
+  settings.qSpeak = n("#sQSpeak", 15, 600, DEFAULTS.qSpeak);
+  settings.dResearch = n("#sDResearch", 1, 60, DEFAULTS.dResearch);
+  settings.dSpeak = n("#sDSpeak", 30, 900, DEFAULTS.dSpeak);
+  settings.record = $("#sRecord").checked; settings.transcript = $("#sTranscript").checked;
+  settings.lang = $("#sLang").value; settings.sound = $("#sSound").checked; settings.auto = $("#sAuto").checked;
+  store.set("settings", settings); render();
+}
+
+/* ---------- helpers ---------- */
+function fmt(s){ s = Math.max(0, Math.round(s)); return Math.floor(s/60) + ":" + String(s%60).padStart(2,"0"); }
+function esc(s){ return String(s).replace(/[&<>"']/g, c => ({ "&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;" })[c]); }
+function saveUi(){ store.set("ui", ui); }
+let toastT; function toast(t){ const el = $("#toast"); el.textContent = t; el.classList.add("show"); clearTimeout(toastT); toastT = setTimeout(()=>el.classList.remove("show"), 2600); }
+
+/* ---------- wiring ---------- */
+$("#modeQuick").onclick = () => { ui.mode = "quick"; saveUi(); if(state!=="review") { cur = cur && pool().some(q=>q.key===cur.key) ? cur : null; state = cur ? "ready" : "idle"; } render(); };
+$("#modeDeep").onclick = () => { ui.mode = "deep"; saveUi(); if(state!=="review") { cur = cur && pool().some(q=>q.key===cur.key) ? cur : null; state = cur ? "ready" : "idle"; } render(); };
+$("#topicSel").onchange = e => { ui.topic = e.target.value; saveUi(); render(); };
+$$(".chip[data-diff]").forEach(c => c.onclick = () => { ui.diff = +c.dataset.diff; saveUi(); render(); });
+$("#weakChip").onclick = () => { ui.weak = !ui.weak; saveUi(); render(); toast(ui.weak ? "Weak spots on: missed and new questions come up more." : "Weak spots off: every question equally likely."); };
+$("#packBtn").onclick = () => { renderPackList(); $("#importMsg").textContent = ""; $("#packDlg").showModal(); };
+$("#settingsBtn").onclick = openSettings;
+$$("dialog [data-close]").forEach(b => b.onclick = () => b.closest("dialog").close());
+$$("dialog").forEach(d => d.addEventListener("click", e => { if(e.target === d) d.close(); }));
+$("#setDlg").addEventListener("close", readSettings);
+$$("#setDlg input, #setDlg select").forEach(el => el.addEventListener("change", readSettings));
+$("#importBtn").onclick = () => addPack($("#importTxt").value);
+$("#importFile").onchange = async e => { for(const f of e.target.files){ addPack(await f.text()); } e.target.value = ""; };
+$("#importUrlBtn").onclick = async () => {
+  const u = $("#importUrl").value.trim(); if(!u) return;
+  try{ if(addPack(await loadUrl(u), true)) $("#importUrl").value = ""; }
+  catch(e){ $("#importMsg").className = "msg err"; $("#importMsg").textContent = "Couldn't load that link: " + e.message; }
+};
+$("#copyPrompt").onclick = async () => {
+  const t = $("#prompt-template").textContent.trim();
+  try{ await navigator.clipboard.writeText(t); toast("Prompt copied. Paste it into the chat where you studied."); }
+  catch{ $("#importTxt").value = t; toast("Copy blocked here, so the prompt is in the box below."); }
+};
+$("#resetPack").onclick = () => {
+  if(!confirm("Reset progress for the questions in the current pack?")) return;
+  pool(true).forEach(q => delete progress[q.key]); store.set("progress", progress); render(); toast("Progress reset.");
+};
+document.addEventListener("keydown", e => {
+  if(document.querySelector("dialog[open]") || /INPUT|TEXTAREA|SELECT/.test(e.target.tagName)) return;
+  const k = e.key.toLowerCase();
+  if(k === " "){
+    e.preventDefault();
+    if(state==="idle"||state==="review") spin();
+    else if(state==="ready") (ui.mode==="quick" && settings.qThink===0) ? startSpeak() : startPrep();
+    else if(state==="prep"||state==="prepdone") startSpeak();
+    else if(state==="speak") finishSpeak();
+  } else if(k === "s" && (state==="idle"||state==="ready"||state==="review")) spin();
+  else if(state === "review" && ["1","2","3"].includes(k)) grade(["nailed","shaky","missed"][+k-1]);
+});
+
+/* ---------- boot ---------- */
+(async () => {
+  const p = new URLSearchParams(location.search).get("pack");
+  render();
+  await loadRepoPacks();
+  if(p){ try{ addPack(await loadUrl(p), true); toast("Pack loaded from link."); }catch{ toast("Couldn't load the pack in the link."); } }
+  render();
+})();
+})();
+</script>
+</body>
+</html>

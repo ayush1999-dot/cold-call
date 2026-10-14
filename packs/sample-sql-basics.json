@@ -1,0 +1,105 @@
+{
+  "schema": "coldcall/v1",
+  "id": "sample-sql-basics",
+  "title": "SQL Basics — Sample Pack",
+  "source": { "type": "book", "name": "Data Analysis for Beginners: SQL (sample)", "part": "Chapter 1" },
+  "created": "2026-10-14",
+  "questions": [
+    {
+      "id": "sql1-01", "type": "concept", "difficulty": 1, "topic": "Foundations", "mode": "quick",
+      "q": "What is a relational database, and why do analysts care about it?",
+      "points": ["Data stored in tables of rows and columns", "Tables linked by keys", "Lets you combine and query data consistently"],
+      "followup": "How is a table different from an Excel sheet?"
+    },
+    {
+      "id": "sql1-02", "type": "compare", "difficulty": 1, "topic": "Keys", "mode": "quick",
+      "q": "Primary key vs foreign key — explain the difference with one real example.",
+      "points": ["Primary key uniquely identifies a row", "Foreign key points to a primary key in another table", "Example: orders.customer_id → customers.id"],
+      "followup": "What happens if a foreign key points to a row that doesn't exist?"
+    },
+    {
+      "id": "sql1-03", "type": "concept", "difficulty": 1, "topic": "SELECT", "mode": "quick",
+      "q": "Walk me through what SELECT, FROM and WHERE each do in a query.",
+      "points": ["FROM picks the table", "WHERE filters rows", "SELECT picks the columns to return"],
+      "followup": "In what order does the database actually run them?"
+    },
+    {
+      "id": "sql1-04", "type": "trick", "difficulty": 2, "topic": "SELECT", "mode": "quick",
+      "q": "Why can't you use a column alias from SELECT inside the WHERE clause?",
+      "points": ["WHERE runs before SELECT", "The alias doesn't exist yet at that point", "Repeat the expression or use a subquery/CTE"],
+      "followup": "Can you use the alias in ORDER BY? Why?"
+    },
+    {
+      "id": "sql1-05", "type": "trick", "difficulty": 2, "topic": "NULL", "mode": "quick",
+      "q": "Why does WHERE column = NULL return nothing?",
+      "points": ["NULL means unknown, not a value", "Any comparison with NULL is unknown, not true", "Use IS NULL / IS NOT NULL"],
+      "followup": "What does COUNT(column) do with NULLs vs COUNT(*)?"
+    },
+    {
+      "id": "sql1-06", "type": "compare", "difficulty": 2, "topic": "Aggregation", "mode": "quick",
+      "q": "WHERE vs HAVING — when do you use each?",
+      "points": ["WHERE filters rows before grouping", "HAVING filters groups after aggregation", "HAVING can use aggregates like SUM()"],
+      "followup": "Give a query that needs both."
+    },
+    {
+      "id": "sql1-07", "type": "eli5", "difficulty": 1, "topic": "Aggregation", "mode": "quick",
+      "q": "Explain GROUP BY to someone who has never written SQL.",
+      "points": ["Puts rows into buckets with the same value", "Then calculates one result per bucket", "Like a pivot table summary"],
+      "followup": "What error do you get if you select a column that isn't grouped?"
+    },
+    {
+      "id": "sql1-08", "type": "compare", "difficulty": 2, "topic": "Joins", "mode": "deep",
+      "q": "INNER JOIN vs LEFT JOIN — explain with customers and orders, and say when the result row counts differ.",
+      "points": ["INNER keeps only matches", "LEFT keeps all left rows, NULLs where no match", "Counts differ when some customers have no orders", "Duplicates appear when one customer has many orders"],
+      "followup": "How would you find customers with no orders?"
+    },
+    {
+      "id": "sql1-09", "type": "debug", "difficulty": 3, "topic": "Joins", "mode": "deep",
+      "q": "After a join, your total revenue is suddenly three times too high. What probably happened, and how do you check?",
+      "points": ["Join fanned out: one-to-many duplicated rows", "Check row counts before and after the join", "Check key uniqueness with GROUP BY key HAVING COUNT(*) > 1", "Aggregate first, then join"],
+      "followup": "How would you prevent this in a report?"
+    },
+    {
+      "id": "sql1-10", "type": "scenario", "difficulty": 2, "topic": "Data quality", "mode": "deep",
+      "q": "You load data from a source system into a target table. How do you prove nothing was lost or changed?",
+      "points": ["Compare row counts", "Compare sums / checksums of key columns", "Use MINUS / EXCEPT both ways to find differences", "Check NULLs, data types and duplicates"],
+      "followup": "Which check would you automate first, and why?"
+    },
+    {
+      "id": "sql1-11", "type": "interview", "difficulty": 2, "topic": "Foundations", "mode": "quick",
+      "q": "Tell me about a time SQL helped you find a problem in data.",
+      "points": ["Situation and what data was involved", "The query or check you used", "What you found", "Result and what changed"],
+      "followup": "What would you do differently now?"
+    },
+    {
+      "id": "sql1-12", "type": "why", "difficulty": 2, "topic": "Aggregation", "mode": "quick",
+      "q": "Why might COUNT(*) and COUNT(DISTINCT customer_id) give very different numbers?",
+      "points": ["COUNT(*) counts rows", "DISTINCT counts unique customers", "Big gap means repeat orders or duplicates"],
+      "followup": "Which one answers 'how many customers bought something'?"
+    },
+    {
+      "id": "sql1-13", "type": "concept", "difficulty": 2, "topic": "Window functions", "mode": "deep",
+      "q": "What is a window function, and how is it different from GROUP BY?",
+      "points": ["Calculates across related rows without collapsing them", "GROUP BY returns one row per group", "Examples: ROW_NUMBER, RANK, running totals with SUM() OVER"],
+      "followup": "How would you get each customer's latest order?"
+    },
+    {
+      "id": "sql1-14", "type": "trick", "difficulty": 3, "topic": "NULL", "mode": "quick",
+      "q": "A NOT IN subquery suddenly returns zero rows. What's the likely cause?",
+      "points": ["The subquery returned a NULL", "x NOT IN (..., NULL) is never true", "Use NOT EXISTS or filter NULLs out"],
+      "followup": "Does IN have the same problem?"
+    },
+    {
+      "id": "sql1-15", "type": "scenario", "difficulty": 3, "topic": "Reporting", "mode": "deep",
+      "q": "Your manager says this month's report number looks wrong. Talk through how you investigate.",
+      "points": ["Clarify what 'wrong' means and the expected number", "Check filters, date ranges and time zones", "Compare with last month and the source", "Look for duplicates, NULLs and late-arriving data", "Explain the cause and the fix clearly"],
+      "followup": "How do you communicate it if it was your mistake?"
+    },
+    {
+      "id": "sql1-16", "type": "eli5", "difficulty": 1, "topic": "Foundations", "mode": "quick",
+      "q": "Explain what an index is using a book as the example.",
+      "points": ["Like the index at the back of a book", "Lets the database find rows without reading everything", "Speeds up reads, slightly slows writes"],
+      "followup": "When would an index not help?"
+    }
+  ]
+}
