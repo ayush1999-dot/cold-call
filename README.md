@@ -1,7 +1,7 @@
 # Cold Call
 
 Spin a question from what you just studied. Think, then answer it **out loud** against the clock.
-Built to revise data analysis topics and practise explaining them clearly for interviews.
+Built to revise topics and practise explaining them clearly for interviews.
 
 ## How it works
 
